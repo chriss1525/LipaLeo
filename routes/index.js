@@ -1,3 +1,11 @@
+const Router = require("express").Router;
+
+const router = Router();
+
+router.get("/", (req, res) => {
+	res.send({message: "Welcome to the USSD API"});
+});
+
 const registeredNumbers = new Set();
 
 // Helper function to validate if the input is a number
@@ -13,7 +21,7 @@ function formatDate(date) {
   return `${day}/${month}/${year}`;
 }
 
-app.post("/ussd", (req, res) => {
+router.post("/ussd", (req, res) => {
   const { sessionId, serviceCode, phoneNumber, text } = req.body;
 
   let response = "";
@@ -123,3 +131,5 @@ app.post("/ussd", (req, res) => {
   res.set("Content-Type: text/plain");
   res.send(response);
 });
+
+module.exports = router;
