@@ -123,7 +123,11 @@ router.post("/ussd", (req, res) => {
         (inputArray.length === 6 && inputArray[1] === "1")
       ) {
         // User provided the recurrence option, ask for the reminder details
-        response = recurrenceOptions(inputArray[3]);
+        if (inputArray.length === 6) {
+          response = recurrenceOptions(inputArray[5]);
+        } else {
+          response = recurrenceOptions(inputArray[4]);
+        }
       } else if (
         (inputArray.length === 6 &&
           (inputArray[1] === "2" || inputArray[1] === "3")) ||
