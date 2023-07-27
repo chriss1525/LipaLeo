@@ -31,11 +31,8 @@ function formatDate(date) {
 
 router.post("/ussd", async (req, res) => {
   const { sessionId, serviceCode, phoneNumber, text } = req.body;
-
   let response = "";
   let [userData] = await fetchUserByPhoneNumber(phoneNumber);
-
-  console.log(userData);
 
   if (userData?.id === undefined) {
     // User is not registered, ask for their name to register
@@ -52,18 +49,8 @@ router.post("/ussd", async (req, res) => {
       // User provided their ID number, ask to add their first bill
       // Process the user's input to save their registration details in the database
       // Respond with a message and option to add a bill
-      // ...
-
-      // After saving the registration details, update the registeredNumbers Set
-      registeredNumbers.add(phoneNumber);
-      storeNewUser(text.split("*"), phoneNumber);
-
-      response = `CON Registration successful. You can now add your first bill.
-            1. Add Bill
-            2. Show Bills
-            3. Edit Bills
-            4. Delete Bills
-            5. Exit`;
+      await storeNewUser(text.split("*"), phoneNumber);
+      response = `END You have been registered successfully. Dial *384*5492# to start using the service.`;
     } else {
       response = "END Invalid input. Please try again.";
     }
@@ -145,8 +132,7 @@ router.post("/ussd", async (req, res) => {
       ) {
         // User provided the reminder details, show the confirmation message
         // Save the bill details to the database and send the SMS notification
-        console.log(inputArray);
-        storeNewBill(inputArray, phoneNumber);
+        storeNewBill(inputArray, userData.id);
         response = "END Bill details added. SMS notification sent.";
       } else {
         response = "END Invalid input. Please try again.";

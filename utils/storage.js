@@ -18,7 +18,7 @@ async function storeNewUser(text, phoneNumber) {
   });
 }
 
-async function storeNewBill(text, phoneNumber) {
+async function storeNewBill(text, user_id) {
   const recurrenceMap = {
     1: "daily",
     2: "weekly",
@@ -44,11 +44,6 @@ async function storeNewBill(text, phoneNumber) {
       reccurence_option,
     ] = text;
 
-    const { data: user, error: userError } = await supabase
-      .from("users")
-      .select()
-      .eq("phone_number", phoneNumber);
-
     const { data, error } = await supabase.from("bills").insert({
       title,
       business_number: businessNumber,
@@ -57,10 +52,39 @@ async function storeNewBill(text, phoneNumber) {
       payment_method: methodMap[method],
       paid: false,
       recurrence: recurrenceMap[recurrence],
-      user_id: user[0].id,
+      user_id,
     });
   } else {
     // till or phone track
+    const [
+      title,
+      method,
+      phone_or_till_number,
+      amount,
+      recurrence,
+      reccurence_option,
+    ] = text;
+
+    let phone_number = null;
+    let till_number = null;
+
+    if (method === 2) {
+      till_number = phone_or_till_number;
+    } else {
+      phone_number = phone_or_till_number;
+    }
+
+    const { data, error } = await supabase.from("bills").insert({
+      title,
+      payment_method: methodMap[method],
+      phone_number,
+      till_number,
+      amount,
+      recurrence: recurrenceMap[recurrence],
+      user_id,
+    });
+
+    console.log(data, error);
   }
 }
 
