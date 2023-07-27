@@ -1,5 +1,7 @@
 const recurrenceOptions = require("../utils/recurrenceOption");
 const {
+  fetchBillByTitle,
+  fetchBills,
   storeNewBill,
   storeNewUser,
   fetchUserByPhoneNumber,
@@ -16,8 +18,6 @@ const router = Router();
 router.get("/", (req, res) => {
   res.send({ message: "Welcome to the USSD API" });
 });
-
-const registeredNumbers = new Set();
 
 // Helper function to validate if the input is a number
 function isNumber(input) {
@@ -44,15 +44,8 @@ router.post("/ussd", async (req, res) => {
         "CON Welcome to LipaLeo Payment Service. Please enter your name:";
     } else if (!text.includes("*")) {
       // User provided their name, ask for their phone number
-      response = `CON Hi ${text}. Please enter your phone number:`;
-    } else if (text.split("*").length === 2) {
-      // User provided their phone number, ask for their ID number
-      response = "CON Please enter your ID number:";
-    } else if (text.split("*").length === 3) {
-      // User provided their ID number, ask to add their first bill
-      // Process the user's input to save their registration details in the database
       // Respond with a message and option to add a bill
-      await storeNewUser(text.split("*"), phoneNumber);
+      await storeNewUser(text, phoneNumber);
       response = `END You have been registered successfully. Dial *384*5492# to start using the service.`;
       // calling a function to send a welcome message to the user
       smsNotifications.sendWelcomeMessage(text.split("*")[0],phoneNumber);
@@ -65,13 +58,47 @@ router.post("/ussd", async (req, res) => {
       response = `CON Welcome back to LipaLeo Bill Payment Service
             1. Add Bill
             2. Show Bills
-            3. Edit Bills
-            4. Delete Bills
-            5. Exit`;
+            3. Delete Bills
+            4. Exit`;
     } else if (text === "1") {
       // User selected to add a bill, show the add bill options
       response = `CON Enter the bill details:
             Title:`;
+    } else if (text === "3") {
+      const bills = await fetchBills(userData.id);
+      response = `CON Select a bill to delete:
+		${bills.map((bill, idx) => `${idx + 1}. ${bill.title}`).join("\n")}
+		`;
+    } else if (text.startsWith("3*")) {
+      const bills = await fetchBills(userData.id);
+      const billIndex = parseInt(text.split("*")[1]) - 1;
+      const [bill] = await fetchBillByTitle(bills[billIndex].title);
+      const { error } = await supabase.from("bills").delete().eq("id", bill.id);
+      response = `END The bill ${bill.title} deleted successfully.`;
+    } else if (text === "2") {
+      const bills = await fetchBills(userData.id);
+      response = `CON Select a bill to view:
+		${bills.map((bill, idx) => `${idx + 1}. ${bill.title}`).join("\n")}
+		`;
+    } else if (text.startsWith("2*")) {
+      const bills = await fetchBills(userData.id);
+      const billIndex = parseInt(text.split("*")[1]) - 1;
+      const [bill] = await fetchBillByTitle(bills[billIndex].title);
+
+      response = `END Bill Details:
+		Title: ${bill.title}
+		Amount: ${bill.amount}
+		Payment Method: ${bill.payment_method}
+		${
+      bill.payment_method === "paybill"
+        ? `PayBill Number: ${bill.business_number}
+			A/C Number: ${bill.account_number}`
+        : bill.payment_method === "till"
+        ? `Till Number: ${bill.till_number}`
+        : `Phone Number: ${bill.phone_number}`
+    }
+		Recurrence: ${bill.recurrence}
+		`;
     } else if (text.startsWith("1*")) {
       const inputArray = text.split("*").slice(1);
 
