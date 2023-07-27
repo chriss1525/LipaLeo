@@ -81,7 +81,7 @@ router.post("/ussd", async (req, res) => {
 		${bills.map((bill, idx) => `${idx + 1}. ${bill.title}`).join("\n")}
 		`;
     } else if (text.startsWith("2*")) {
-      const bills = await fetchBills(userData.id);
+      const bills = await fetchBills(userData.id);'''''
       const billIndex = parseInt(text.split("*")[1]) - 1;
       const [bill] = await fetchBillByTitle(bills[billIndex].title);
 
@@ -144,6 +144,7 @@ router.post("/ussd", async (req, res) => {
 		  1. Daily
 		  2. Weekly
 		  3. Monthly
+
 		  4. Yearly
 		  `;
       } else if (
