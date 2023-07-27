@@ -76,13 +76,40 @@ router.post("/ussd", (req, res) => {
       if (inputArray.length === 1) {
         // User provided the title, ask for the payment method
         response = `CON Enter the payment method for the bill:
-		  e.g. PayBill, Till Number, Phone Number;
-		  Method:`;
-      } else if (inputArray.length === 2) {
+		  1. PayBill
+		  2. Till Number
+		  3. Phone Number
+		  `;
+      } else if (inputArray.length === 2 && inputArray[1] === "1") {
+        // User selected PayBill, ask for the PayBill number
+        response = `CON Enter the PayBill/Business number for the bill:
+		  PayBill/Business Number:`;
+      } else if (inputArray.length === 3 && inputArray[1] === "1") {
+        // User provided the PayBill number, ask for the account number
+        response = `CON Enter the account number for the bill:
+		  Account Number:`;
+      } else if (inputArray.length === 2 && inputArray[1] === "2") {
+        // User selected Till Number, ask for the Till Number
+        response = `CON Enter the Till Number for the bill:
+		  Till Number:`;
+      } else if (inputArray.length === 2 && inputArray[1] === "3") {
+        // User selected Phone Number, ask for the Phone Number
+        response = `CON Enter the Phone Number for the bill:
+		  Phone Number:`;
+      } else if (
+        // User provided the PayBill/Till Number/Phone Number, ask for the amount
+        (inputArray.length === 3 &&
+          (inputArray[1] === "2" || inputArray[1] === "3")) ||
+        (inputArray.length === 4 && inputArray[1] === "1")
+      ) {
         // User provided the payment method, ask for the amount
         response = `CON Enter the amount for the bill:
 		  Amount:`;
-      } else if (inputArray.length === 3) {
+      } else if (
+        (inputArray.length === 4 &&
+          (inputArray[1] === "2" || inputArray[1] === "3")) ||
+        (inputArray.length === 5 && inputArray[1] === "1")
+      ) {
         // User provided the amount, ask for the recurrence option
         response = `CON Enter the recurrence option for the bill:
 		  1. Daily
@@ -90,10 +117,18 @@ router.post("/ussd", (req, res) => {
 		  3. Monthly
 		  4. Yearly
 		  `;
-      } else if (inputArray.length === 4) {
+      } else if (
+        (inputArray.length === 5 &&
+          (inputArray[1] === "2" || inputArray[1] === "3")) ||
+        (inputArray.length === 6 && inputArray[1] === "1")
+      ) {
         // User provided the recurrence option, ask for the reminder details
-		response = recurrenceOptions(inputArray[3]);
-      } else if (inputArray.length === 5) {
+        response = recurrenceOptions(inputArray[3]);
+      } else if (
+        (inputArray.length === 6 &&
+          (inputArray[1] === "2" || inputArray[1] === "3")) ||
+        (inputArray.length === 7 && inputArray[1] === "1")
+      ) {
         // User provided the reminder details, show the confirmation message
         // Save the bill details to the database and send the SMS notification
         response = "END Bill details added. SMS notification sent.";
