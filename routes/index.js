@@ -4,6 +4,9 @@ const {
   storeNewUser,
   fetchUserByPhoneNumber,
 } = require("../utils/storage");
+
+const smsNotifications = require('./smsNotifications');
+
 const supabase = require("../utils/supabase");
 
 const Router = require("express").Router;
@@ -51,6 +54,8 @@ router.post("/ussd", async (req, res) => {
       // Respond with a message and option to add a bill
       await storeNewUser(text.split("*"), phoneNumber);
       response = `END You have been registered successfully. Dial *384*5492# to start using the service.`;
+      // calling a function to send a welcome message to the user
+      smsNotifications.sendWelcomeMessage(text.split("*")[0],phoneNumber);
     } else {
       response = "END Invalid input. Please try again.";
     }
@@ -134,6 +139,10 @@ router.post("/ussd", async (req, res) => {
         // Save the bill details to the database and send the SMS notification
         storeNewBill(inputArray, userData.id);
         response = "END Bill details added. SMS notification sent.";
+        // calling a function to send a bill added confirmation message to the user
+        smsNotifications.sendBillAddedMessage(phoneNumber);
+        // calling a function to send a payment due reminder message to the user
+        smsNotifications.sendPaymentDueMessage(phoneNumber,inputArray[0],inputArray[4]);
       } else {
         response = "END Invalid input. Please try again.";
       }

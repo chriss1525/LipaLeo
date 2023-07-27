@@ -33,8 +33,8 @@ function sendWelcomeMessage(name, phoneNumber) {
 
 // Function to send a bill added confirmation message
 function sendBillAddedMessage(phoneNumber) {
-    const message = `Your bill has been added.`;
-
+    const message = `Your bill has been added successfully.`;
+    
     const options = {
         to: [phoneNumber],
         message: message,
@@ -96,3 +96,12 @@ const phoneNumber = '+254711XXXYYY';
 sendWelcomeMessage(name, phoneNumber);
 
 // To send other messages for different events, use the respective functions as needed.
+// export to index.js
+// Export all the functions together
+module.exports = {
+    sendWelcomeMessage,
+    sendBillAddedMessage,
+    sendPaymentDueMessage,
+    sendPaymentCompleteMessage
+};
+// Path: routes/index.js
