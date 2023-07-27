@@ -1,4 +1,10 @@
 const recurrenceOptions = require("../utils/recurrenceOption");
+const {
+  storeNewBill,
+  storeNewUser,
+  fetchUserByPhoneNumber,
+} = require("../utils/storage");
+const supabase = require("../utils/supabase");
 
 const Router = require("express").Router;
 
@@ -23,12 +29,15 @@ function formatDate(date) {
   return `${day}/${month}/${year}`;
 }
 
-router.post("/ussd", (req, res) => {
+router.post("/ussd", async (req, res) => {
   const { sessionId, serviceCode, phoneNumber, text } = req.body;
 
   let response = "";
+  let [userData] = await fetchUserByPhoneNumber(phoneNumber);
 
-  if (!registeredNumbers.has(phoneNumber)) {
+  console.log(userData);
+
+  if (userData?.id === undefined) {
     // User is not registered, ask for their name to register
     if (text === "") {
       response =
@@ -47,6 +56,7 @@ router.post("/ussd", (req, res) => {
 
       // After saving the registration details, update the registeredNumbers Set
       registeredNumbers.add(phoneNumber);
+      storeNewUser(text.split("*"), phoneNumber);
 
       response = `CON Registration successful. You can now add your first bill.
             1. Add Bill
@@ -135,6 +145,8 @@ router.post("/ussd", (req, res) => {
       ) {
         // User provided the reminder details, show the confirmation message
         // Save the bill details to the database and send the SMS notification
+        console.log(inputArray);
+        storeNewBill(inputArray, phoneNumber);
         response = "END Bill details added. SMS notification sent.";
       } else {
         response = "END Invalid input. Please try again.";
