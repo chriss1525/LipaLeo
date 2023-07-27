@@ -82,8 +82,8 @@ ${bills.map((bill, idx) => `${idx + 1}. ${bill.title}`).join("\n")}
     } else if (text === "2") {
       const bills = await fetchBills(userData.id);
       response = `CON Select a bill to view:
-		${bills.map((bill, idx) => `${idx + 1}. ${bill.title}`).join("\n")}
-		`;
+${bills.map((bill, idx) => `${idx + 1}. ${bill.title}`).join("\n")}
+`;
     } else if (text.startsWith("2*")) {
       const bills = await fetchBills(userData.id);
       const billIndex = parseInt(text.split("*")[1]) - 1;
