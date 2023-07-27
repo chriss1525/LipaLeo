@@ -1,5 +1,30 @@
 const supabase = require("./supabase");
 
+async function fetchBillByTitle(title) {
+  const { data, error } = await supabase
+    .from("bills")
+    .select()
+    .eq("title", title);
+  return data;
+}
+
+exports.fetchBillByTitle = fetchBillByTitle;
+
+async function fetchBills(userId) {
+  const { data, error } = await supabase
+    .from("bills")
+    .select()
+    .eq("user_id", userId);
+
+  return data;
+}
+
+exports.fetchBills = fetchBills;
+
+async function deleteBill(id) {}
+
+exports.deleteBill = deleteBill;
+
 async function fetchUserByPhoneNumber(phoneNumber) {
   const { data, error } = await supabase
     .from("users")

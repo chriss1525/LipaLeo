@@ -1,5 +1,7 @@
 const recurrenceOptions = require("../utils/recurrenceOption");
 const {
+  fetchBillByTitle,
+  fetchBills,
   storeNewBill,
   storeNewUser,
   fetchUserByPhoneNumber,
@@ -13,8 +15,6 @@ const router = Router();
 router.get("/", (req, res) => {
   res.send({ message: "Welcome to the USSD API" });
 });
-
-const registeredNumbers = new Set();
 
 // Helper function to validate if the input is a number
 function isNumber(input) {
@@ -31,6 +31,7 @@ function formatDate(date) {
 
 router.post("/ussd", async (req, res) => {
   const { sessionId, serviceCode, phoneNumber, text } = req.body;
+  console.log(req.body);
   let response = "";
   let [userData] = await fetchUserByPhoneNumber(phoneNumber);
 
@@ -67,6 +68,30 @@ router.post("/ussd", async (req, res) => {
       // User selected to add a bill, show the add bill options
       response = `CON Enter the bill details:
             Title:`;
+    } else if (text === "2") {
+      const bills = await fetchBills(userData.id);
+      response = `CON Select a bill to view:
+		${bills.map((bill, idx) => `${idx + 1}. ${bill.title}`).join("\n")}
+		`;
+    } else if (text.startsWith("2*")) {
+      const bills = await fetchBills(userData.id);
+      const billIndex = parseInt(text.split("*")[1]) - 1;
+      const [bill] = await fetchBillByTitle(bills[billIndex].title);
+
+      response = `END Bill Details:
+		Title: ${bill.title}
+		Amount: ${bill.amount}
+		Payment Method: ${bill.payment_method}
+		${
+      bill.payment_method === "paybill"
+        ? `PayBill Number: ${bill.business_number}
+			A/C Number: ${bill.account_number}`
+        : bill.payment_method === "till"
+        ? `Till Number: ${bill.till_number}`
+        : `Phone Number: ${bill.phone_number}`
+    }
+		Recurrence: ${bill.recurrence}
+		`;
     } else if (text.startsWith("1*")) {
       const inputArray = text.split("*").slice(1);
 
