@@ -35,12 +35,15 @@ async function fetchUserByPhoneNumber(phoneNumber) {
 }
 
 async function storeNewUser(text, phoneNumber) {
-  const [name] = text;
+  const name = text;
 
-  const { data, error } = await supabase.from("users").insert({
-    name,
-    phone_number: phoneNumber,
-  });
+  const { data, error } = await supabase
+    .from("users")
+    .insert({
+      name,
+      phone_number: phoneNumber,
+    })
+    .select();
 
   if (error) {
     console.log(error);

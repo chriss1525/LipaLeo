@@ -48,8 +48,9 @@ router.post("/ussd", async (req, res) => {
     } else if (!text.includes("*")) {
       // User provided their name, ask for their phone number
       // Respond with a message and option to add a bill
-      const [user] = await storeNewUser(text, phoneNumber);
-      response = `END ${user.name}, you have been registered successfully. Dial *789*123456# to start using the service.`;
+      const user = await storeNewUser(text, phoneNumber);
+      console.log(user);
+      response = `END ${user[0]?.name}, you have been registered successfully. Dial *789*123456# to start using the service.`;
       // calling a function to send a welcome message to the user
       smsNotifications.sendWelcomeMessage(text.split("*")[0], phoneNumber);
     } else {
