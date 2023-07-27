@@ -31,7 +31,6 @@ function formatDate(date) {
 
 router.post("/ussd", async (req, res) => {
   const { sessionId, serviceCode, phoneNumber, text } = req.body;
-  console.log(req.body);
   let response = "";
   let [userData] = await fetchUserByPhoneNumber(phoneNumber);
 
@@ -42,15 +41,8 @@ router.post("/ussd", async (req, res) => {
         "CON Welcome to LipaLeo Payment Service. Please enter your name:";
     } else if (!text.includes("*")) {
       // User provided their name, ask for their phone number
-      response = `CON Hi ${text}. Please enter your phone number:`;
-    } else if (text.split("*").length === 2) {
-      // User provided their phone number, ask for their ID number
-      response = "CON Please enter your ID number:";
-    } else if (text.split("*").length === 3) {
-      // User provided their ID number, ask to add their first bill
-      // Process the user's input to save their registration details in the database
       // Respond with a message and option to add a bill
-      await storeNewUser(text.split("*"), phoneNumber);
+      await storeNewUser(text, phoneNumber);
       response = `END You have been registered successfully. Dial *384*5492# to start using the service.`;
     } else {
       response = "END Invalid input. Please try again.";
