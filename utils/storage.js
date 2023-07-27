@@ -21,8 +21,7 @@ async function fetchBills(userId) {
 
 exports.fetchBills = fetchBills;
 
-async function deleteBill(id) {
-}
+async function deleteBill(id) {}
 
 exports.deleteBill = deleteBill;
 
@@ -36,12 +35,22 @@ async function fetchUserByPhoneNumber(phoneNumber) {
 }
 
 async function storeNewUser(text, phoneNumber) {
-  const [title, _phone, _id] = text;
+  const name = text;
 
-  const { data, error } = await supabase.from("users").insert({
-    title,
-    phone_number: phoneNumber,
-  });
+  const { data, error } = await supabase
+    .from("users")
+    .insert({
+      name,
+      phone_number: phoneNumber,
+    })
+    .select();
+
+  if (error) {
+    console.log(error);
+    return;
+  }
+
+  return data;
 }
 
 async function storeNewBill(text, user_id) {
@@ -70,16 +79,22 @@ async function storeNewBill(text, user_id) {
       reccurence_option,
     ] = text;
 
-    const { data, error } = await supabase.from("bills").insert({
-      title,
-      business_number: businessNumber,
-      account_number: accountNumber,
-      amount: amount,
-      payment_method: methodMap[method],
-      paid: false,
-      recurrence: recurrenceMap[recurrence],
-      user_id,
-    });
+    const { data, error } = await supabase
+      .from("bills")
+      .insert({
+        title,
+        business_number: businessNumber,
+        account_number: accountNumber,
+        amount: amount,
+        payment_method: methodMap[method],
+        paid: false,
+        recurrence: recurrenceMap[recurrence],
+        user_id,
+      })
+      .select();
+
+    console.log("bill", data);
+    return data;
   } else {
     // till or phone track
     const [
@@ -94,23 +109,27 @@ async function storeNewBill(text, user_id) {
     let phone_number = null;
     let till_number = null;
 
-    if (method === 2) {
+    if (method === "2") {
       till_number = phone_or_till_number;
     } else {
       phone_number = phone_or_till_number;
     }
 
-    const { data, error } = await supabase.from("bills").insert({
-      title,
-      payment_method: methodMap[method],
-      phone_number,
-      till_number,
-      amount,
-      recurrence: recurrenceMap[recurrence],
-      user_id,
-    });
-
-    console.log(data, error);
+    const { data, error } = await supabase
+      .from("bills")
+      .insert({
+        title,
+        payment_method: methodMap[method],
+        phone_number,
+        till_number,
+        amount,
+        recurrence: recurrenceMap[recurrence],
+        user_id,
+        paid: false,
+      })
+      .select();
+    console.log("bill", data);
+    return data;
   }
 }
 
