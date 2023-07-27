@@ -21,7 +21,8 @@ async function fetchBills(userId) {
 
 exports.fetchBills = fetchBills;
 
-async function deleteBill(id) {}
+async function deleteBill(id) {
+}
 
 exports.deleteBill = deleteBill;
 

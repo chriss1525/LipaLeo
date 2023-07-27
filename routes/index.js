@@ -61,13 +61,23 @@ router.post("/ussd", async (req, res) => {
       response = `CON Welcome back to LipaLeo Bill Payment Service
             1. Add Bill
             2. Show Bills
-            3. Edit Bills
-            4. Delete Bills
-            5. Exit`;
+            3. Delete Bills
+            4. Exit`;
     } else if (text === "1") {
       // User selected to add a bill, show the add bill options
       response = `CON Enter the bill details:
             Title:`;
+    } else if (text === "3") {
+      const bills = await fetchBills(userData.id);
+      response = `CON Select a bill to delete:
+		${bills.map((bill, idx) => `${idx + 1}. ${bill.title}`).join("\n")}
+		`;
+    } else if (text.startsWith("3*")) {
+      const bills = await fetchBills(userData.id);
+      const billIndex = parseInt(text.split("*")[1]) - 1;
+      const [bill] = await fetchBillByTitle(bills[billIndex].title);
+      const { error } = await supabase.from("bills").delete().eq("id", bill.id);
+      response = `END The bill ${bill.title} deleted successfully.`;
     } else if (text === "2") {
       const bills = await fetchBills(userData.id);
       response = `CON Select a bill to view:
