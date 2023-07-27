@@ -1,9 +1,11 @@
+const recurrenceOptions = require("../utils/recurrenceOption");
+
 const Router = require("express").Router;
 
 const router = Router();
 
 router.get("/", (req, res) => {
-	res.send({message: "Welcome to the USSD API"});
+  res.send({ message: "Welcome to the USSD API" });
 });
 
 const registeredNumbers = new Set();
@@ -73,21 +75,27 @@ router.post("/ussd", (req, res) => {
 
       if (inputArray.length === 1) {
         // User provided the title, ask for the payment method
-        // ...
+        response = `CON Enter the payment method for the bill:
+		  e.g. PayBill, Till Number, Phone Number;
+		  Method:`;
       } else if (inputArray.length === 2) {
         // User provided the payment method, ask for the amount
-        // ...
+        response = `CON Enter the amount for the bill:
+		  Amount:`;
       } else if (inputArray.length === 3) {
         // User provided the amount, ask for the recurrence option
-        // ...
+        response = `CON Enter the recurrence option for the bill:
+		  1. Daily
+		  2. Weekly
+		  3. Monthly
+		  4. Yearly
+		  `;
       } else if (inputArray.length === 4) {
         // User provided the recurrence option, ask for the reminder details
-        // ...
+		response = recurrenceOptions(inputArray[3]);
       } else if (inputArray.length === 5) {
         // User provided the reminder details, show the confirmation message
         // Save the bill details to the database and send the SMS notification
-        // ...
-
         response = "END Bill details added. SMS notification sent.";
       } else {
         response = "END Invalid input. Please try again.";
